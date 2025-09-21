@@ -223,7 +223,7 @@ def render_dice() -> None:
     # Get current roll color
     roll_color = get_roll_color()
     
-    # All 5 dice in one row with larger size
+    # All 5 dice in one row
     col1, col2, col3, col4, col5 = st.columns(5)
     dice_cols = [col1, col2, col3, col4, col5]
     
@@ -232,61 +232,57 @@ def render_dice() -> None:
             die_value = game.dice[i]
             is_held = game.dice_held[i]
             
-            # Determine button style
+            # Create CSS for this specific die
             if is_held:
-                # Use a darker shade when held
-                button_style = """
-                <style>
-                .held-dice button {
-                    background-color: #666666 !important;
-                    color: white !important;
-                    border: 3px solid #333333 !important;
-                    font-size: 2.5rem !important;
-                    height: 80px !important;
-                    border-radius: 12px !important;
-                }
-                </style>
-                """
-                st.markdown(button_style, unsafe_allow_html=True)
-                button_text = f"🔒\n{dice_emoji[die_value]}"
-                button_type = "secondary"
-                container_class = "held-dice"
+                bg_color = "#555555"
+                text_color = "white"
+                border_color = "#333333"
+                dice_display = f"🔒{dice_emoji[die_value]}"
             else:
-                # Use roll color for unheld dice
-                button_style = f"""
-                <style>
-                .roll-dice-{i} button {{
-                    background-color: {roll_color} !important;
-                    color: #333333 !important;
-                    border: 2px solid #cccccc !important;
-                    font-size: 2.5rem !important;
-                    height: 80px !important;
-                    border-radius: 12px !important;
-                }}
-                .roll-dice-{i} button:hover {{
-                    border: 3px solid #999999 !important;
-                    transform: translateY(-2px) !important;
-                }}
-                </style>
-                """
-                st.markdown(button_style, unsafe_allow_html=True)
-                button_text = dice_emoji[die_value]
-                button_type = "primary"
-                container_class = f"roll-dice-{i}"
+                bg_color = roll_color
+                text_color = "#333333"
+                border_color = "#cccccc"
+                dice_display = dice_emoji[die_value]
             
-            # Create a container with the appropriate class
-            st.markdown(f'<div class="{container_class}">', unsafe_allow_html=True)
+            # Custom CSS for this die button
+            dice_css = f"""
+            <style>
+            .dice-{i} button {{
+                background-color: {bg_color} !important;
+                color: {text_color} !important;
+                border: 3px solid {border_color} !important;
+                border-radius: 15px !important;
+                font-size: 3.5rem !important;
+                height: 100px !important;
+                width: 100% !important;
+                padding: 0 !important;
+                line-height: 1 !important;
+                font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }}
+            .dice-{i} button:hover {{
+                border-color: #999999 !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+            }}
+            </style>
+            """
+            st.markdown(dice_css, unsafe_allow_html=True)
+            
+            # Wrap in div with class
+            st.markdown(f'<div class="dice-{i}">', unsafe_allow_html=True)
             
             if st.button(
-                button_text,
+                dice_display,
                 key=f"dice_button_{i}",
                 disabled=game.rolls_left == 3,
-                type=button_type,
                 use_container_width=True
             ):
                 game.toggle_die_hold(i)
                 st.rerun()
-            
+                
             st.markdown('</div>', unsafe_allow_html=True)
 
 
@@ -483,11 +479,21 @@ def main():
         }
     }
     
-    /* Dice button styling */
-    .stButton button {
-        font-weight: bold;
-        text-align: center;
-        line-height: 1.2;
+    /* Remove default button styling for dice */
+    [class*="dice-"] button {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Ensure dice buttons maintain their custom styling */
+    [class*="dice-"] button:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    [class*="dice-"] button:active {
+        transform: translateY(-1px) !important;
     }
     </style>
     """,
