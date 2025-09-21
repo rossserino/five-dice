@@ -1,52 +1,4 @@
-def render_dice() -> None:
-    """Render the dice with hold/unhold functionality and color-coded rolls."""
-    st.subheader("🎲 Dice")
-    game = st.session_state.game
-    
-    # Show instruction only when rolls have started
-    if game.rolls_left < 3:
-        st.caption("💡 Tap dice to hold/unhold them")
-    
-    dice_emoji = {1: "⚀", 2: "⚁", 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅"}
-    
-    # Get current roll color
-    roll_color = get_roll_color()
-    
-    # Create a unique CSS class for this dice section
-    dice_section_id = "dice_section_" + str(hash(str(game.dice) + str(game.dice_held)))
-    
-    # All 5 dice in one row
-    col1, col2, col3, col4, col5 = st.columns(5)
-    dice_cols = [col1, col2, col3, col4, col5]
-    
-    for i, col in enumerate(dice_cols):
-        with col:
-            die_value = game.dice[i]
-            is_held = game.dice_held[i]
-            
-            # Determine display and button colors
-            if is_held:
-                dice_display = f"🔒{dice_emoji[die_value]}"
-                button_type = "secondary"
-                bg_color = "#555555"
-                text_color = "white"
-                border_color = "#333333"
-            else:
-                dice_display = dice_emoji[die_value]
-                button_type = "primary"
-                bg_color = roll_color
-                text_color = "#333333"
-                border_color = "#cccccc"
-            
-            # Create unique CSS for each individual button
-            button_css = f"""
-            <style>
-            /* Target this specific button */
-            .dice-btn-{i} .stButton > button {{
-                background-color: {bg_color} !important;
-                color: {text_color} !important;
-                border: 3px solid {border_color} !important;
-      import json
+import json
 import random
 import time
 from dataclasses import dataclass, field
@@ -271,78 +223,8 @@ def render_dice() -> None:
     # Get current roll color
     roll_color = get_roll_color()
     
-    # Create comprehensive CSS targeting the actual Streamlit button structure
-    dice_css = f"""
-    <style>
-    /* Target all buttons in the dice section more broadly */
-    .stButton > button,
-    button[kind="primary"],
-    button[kind="secondary"],
-    .st-emotion-cache-1c14dmz button,
-    .stButton button {{
-        font-size: 3.5rem !important;
-        height: 100px !important;
-        width: 100% !important;
-        padding: 10px !important;
-        line-height: 1 !important;
-        font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif !important;
-        border-radius: 15px !important;
-        border-width: 3px !important;
-        font-weight: normal !important;
-        transition: all 0.2s ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }}
-    
-    /* Apply roll colors to primary buttons (unheld dice) */
-    button[data-testid="stBaseButton-primary"],
-    .stButton > button[kind="primary"],
-    button[kind="primary"] {{
-        background-color: {roll_color} !important;
-        color: #333333 !important;
-        border-color: #cccccc !important;
-    }}
-    
-    /* Apply held colors to secondary buttons */
-    button[data-testid="stBaseButton-secondary"],
-    .stButton > button[kind="secondary"],
-    button[kind="secondary"] {{
-        background-color: #555555 !important;
-        color: white !important;
-        border-color: #333333 !important;
-    }}
-    
-    /* Hover effects */
-    .stButton > button:hover,
-    button:hover {{
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-        border-color: #999999 !important;
-    }}
-    
-    /* Disabled state */
-    .stButton > button:disabled,
-    button:disabled {{
-        opacity: 0.6 !important;
-        cursor: not-allowed !important;
-        transform: none !important;
-    }}
-    
-    /* Force override any Streamlit default colors */
-    .stButton button[data-testid="stBaseButton-primary"] {{
-        background: {roll_color} !important;
-        border: 3px solid #cccccc !important;
-    }}
-    
-    .stButton button[data-testid="stBaseButton-secondary"] {{
-        background: #555555 !important;
-        border: 3px solid #333333 !important;
-        color: white !important;
-    }}
-    </style>
-    """
-    st.markdown(dice_css, unsafe_allow_html=True)
+    # Create a unique CSS class for this dice section
+    dice_section_id = "dice_section_" + str(hash(str(game.dice) + str(game.dice_held)))
     
     # All 5 dice in one row
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -353,13 +235,59 @@ def render_dice() -> None:
             die_value = game.dice[i]
             is_held = game.dice_held[i]
             
-            # Determine display and button type
+            # Determine display and button colors
             if is_held:
                 dice_display = f"🔒{dice_emoji[die_value]}"
                 button_type = "secondary"
+                bg_color = "#555555"
+                text_color = "white"
+                border_color = "#333333"
             else:
                 dice_display = dice_emoji[die_value]
                 button_type = "primary"
+                bg_color = roll_color
+                text_color = "#333333"
+                border_color = "#cccccc"
+            
+            # Create unique CSS for each individual button
+            button_css = f"""
+            <style>
+            /* Target this specific button */
+            .dice-btn-{i} .stButton > button {{
+                background-color: {bg_color} !important;
+                color: {text_color} !important;
+                border: 3px solid {border_color} !important;
+                border-radius: 15px !important;
+                font-size: 3.5rem !important;
+                height: 100px !important;
+                width: 100% !important;
+                padding: 10px !important;
+                line-height: 1 !important;
+                font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif !important;
+                font-weight: normal !important;
+                transition: all 0.2s ease !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }}
+            
+            .dice-btn-{i} .stButton > button:hover {{
+                border-color: #999999 !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+            }}
+            
+            .dice-btn-{i} .stButton > button:disabled {{
+                opacity: 0.6 !important;
+                cursor: not-allowed !important;
+                transform: none !important;
+            }}
+            </style>
+            """
+            st.markdown(button_css, unsafe_allow_html=True)
+            
+            # Create container with unique class
+            st.markdown(f'<div class="dice-btn-{i}">', unsafe_allow_html=True)
             
             if st.button(
                 dice_display,
@@ -370,6 +298,8 @@ def render_dice() -> None:
             ):
                 game.toggle_die_hold(i)
                 st.rerun()
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_roll_section() -> None:
