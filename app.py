@@ -229,7 +229,6 @@ def render_dice() -> None:
     /* Use a more aggressive approach - target ALL buttons in this section */
     div[data-testid="stVerticalBlock"] button {{
         font-size: 4rem !important;
-        height: 120px !important;
         width: 100% !important;
         padding: 5px !important;
         line-height: 1 !important;
@@ -239,6 +238,10 @@ def render_dice() -> None:
         font-weight: normal !important;
         transition: all 0.3s ease !important;
         margin: 0 !important;
+    }}
+
+    div[data-testid="stVerticalBlock"] button p {{
+        font-size: 1.5rem
     }}
     
     /* Style primary buttons (unheld dice) */
