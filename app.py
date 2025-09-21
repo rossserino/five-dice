@@ -346,8 +346,21 @@ def render_roll_section() -> None:
 
     with col3:
         if game.rolls_left < 3:
-            held_count = sum(game.dice_held)
-            st.metric("Dice Held", held_count)
+            # Get held dice emoji instead of just count
+            dice_emoji = {1: "⚀", 2: "⚁", 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅"}
+            held_dice = [game.dice[i] for i in range(5) if game.dice_held[i]]
+            
+            if held_dice:
+                # Create a string of held dice emoji
+                held_dice_display = "".join([dice_emoji[die] for die in held_dice])
+                st.metric("Dice Held", f"{len(held_dice)}")
+                # Display the actual dice below the count
+                st.markdown(f"<div style='text-align: center; font-size: 1.5rem; margin-top: -10px;'>{held_dice_display}</div>", 
+                           unsafe_allow_html=True)
+            else:
+                st.metric("Dice Held", "0")
+                st.markdown("<div style='text-align: center; font-size: 1.2rem; margin-top: -10px; color: #666;'>None</div>", 
+                           unsafe_allow_html=True)
 
 
 def render_scoring_section() -> None:
