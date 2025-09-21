@@ -272,16 +272,16 @@ def render_dice() -> None:
             st.markdown(dice_css, unsafe_allow_html=True)
             
             # Wrap in div with class
-            st.markdown(f'<div class="dice-{i}">', unsafe_allow_html=True)
+            with: st.markdown(f'<div class="dice-{i}">', unsafe_allow_html=True)
             
-            if st.button(
-                dice_display,
-                key=f"dice_button_{i}",
-                disabled=game.rolls_left == 3,
-                use_container_width=True
-            ):
-                game.toggle_die_hold(i)
-                st.rerun()
+                if st.button(
+                    dice_display,
+                    key=f"dice_button_{i}",
+                    disabled=game.rolls_left == 3,
+                    use_container_width=True
+                ):
+                    game.toggle_die_hold(i)
+                    st.rerun()
                 
             st.markdown('</div>', unsafe_allow_html=True)
 
