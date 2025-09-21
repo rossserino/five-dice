@@ -253,7 +253,11 @@ def render_dice() -> None:
             button_css = f"""
             <style>
             /* Target this specific button */
-            .dice-btn-{i} .stButton > button {{
+            .stElementContainer .stButton p {{
+                font-size: 3.5rem !important;
+            }}
+
+            .dice-btn-{i} .stButton > button, .stElementContainer .stButton > button {{
                 background-color: {bg_color} !important;
                 color: {text_color} !important;
                 border: 3px solid {border_color} !important;
@@ -271,13 +275,13 @@ def render_dice() -> None:
                 justify-content: center !important;
             }}
             
-            .dice-btn-{i} .stButton > button:hover {{
+            .dice-btn-{i} .stButton > button:hover, .stElementContainer .stButton > button:hover {{
                 border-color: #999999 !important;
                 transform: translateY(-2px) !important;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
             }}
             
-            .dice-btn-{i} .stButton > button:disabled {{
+            .dice-btn-{i} .stButton > button:disabled, .stElementContainer .stButton > button:disabled {{
                 opacity: 0.6 !important;
                 cursor: not-allowed !important;
                 transform: none !important;
