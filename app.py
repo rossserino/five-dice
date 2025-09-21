@@ -46,7 +46,7 @@ class Player:
         return total + self.get_upper_section_bonus()
 
 
-class Five DiceGame:
+class FiveDiceGame:
     """Main game logic for Five Dice."""
 
     def __init__(self):
@@ -129,7 +129,7 @@ class Five DiceGame:
 def initialize_game() -> None:
     """Initialize a new game."""
     if "game" not in st.session_state:
-        st.session_state.game = Five DiceGame()
+        st.session_state.game = FiveDiceGame()
         st.session_state.game.players = [Player("Player 1"), Player("Player 2")]
 
 
@@ -405,7 +405,7 @@ def render_new_game_button() -> None:
     with col2:  # Center the button
         if st.button("🔄 Start New Game", type="secondary", use_container_width=True):
             # Reset the game
-            st.session_state.game = Five DiceGame()
+            st.session_state.game = FiveDiceGame()
             st.session_state.game.players = [Player("Player 1"), Player("Player 2")]
             st.success("🎉 New game started!")
             st.rerun()
