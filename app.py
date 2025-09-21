@@ -361,6 +361,8 @@ def render_roll_section() -> None:
     game = st.session_state.game
     current_player = game.players[game.current_player]
 
+    # Add an anchor for scrolling
+    st.markdown(f'<div id="player-turn-section"></div>', unsafe_allow_html=True)
     st.subheader(f"🎯 {current_player.name}'s Turn")
 
     col1, col2 = st.columns([1, 2])  # Removed the third column since dice held moved
@@ -432,6 +434,25 @@ def render_scoring_section() -> None:
                         ):
                             if game.score_category(category):
                                 st.success(f"🎉 Scored {potential_score} points in {display_name}!")
+                                
+                                # Add JavaScript to scroll to the player turn section
+                                scroll_script = """
+                                <script>
+                                setTimeout(function() {
+                                    const element = document.getElementById('player-turn-section');
+                                    if (element) {
+                                        element.scrollIntoView({ 
+                                            behavior: 'smooth', 
+                                            block: 'start' 
+                                        });
+                                    }
+                                }, 100);
+                                </script>
+                                """
+                                st.markdown(scroll_script, unsafe_allow_html=True)
+                                
+                                # Also set a session state flag to trigger scroll on rerun
+                                st.session_state.should_scroll = True
                                 st.rerun()
 
 
@@ -560,6 +581,16 @@ def main():
     [class*="dice-"] button:active {
         transform: translateY(-1px) !important;
     }
+    
+    /* Smooth scrolling for the entire page */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Ensure anchors are visible above fixed headers if any */
+    #player-turn-section {
+        scroll-margin-top: 20px;
+    }
     </style>
     """,
         unsafe_allow_html=True,
@@ -573,6 +604,24 @@ def main():
     
     # Render color palette selector in sidebar
     render_color_palette_selector()
+
+    # Check if we need to scroll after page load
+    if st.session_state.get('should_scroll', False):
+        scroll_script = """
+        <script>
+        setTimeout(function() {
+            const element = document.getElementById('player-turn-section');
+            if (element) {
+                element.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 500);
+        </script>
+        """
+        st.markdown(scroll_script, unsafe_allow_html=True)
+        st.session_state.should_scroll = False
 
     # Game rules expander
     with st.expander("📋 How to Play", expanded=False):
