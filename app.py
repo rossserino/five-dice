@@ -126,97 +126,104 @@ class FiveDiceGame:
         return max(self.players, key=lambda p: p.get_total_score())
 
 
+# Color palettes for different rolls
+COLOR_PALETTES = {
+    "Cool": {
+        1: "#E3F2FD",  # Light blue
+        2: "#BBDEFB",  # Medium blue  
+        3: "#90CAF9",  # Darker blue
+    },
+    "Pastels": {
+        1: "#F8BBD9",  # Light pink
+        2: "#E1BEE7",  # Light purple
+        3: "#C5CAE9",  # Light indigo
+    },
+    "Warm": {
+        1: "#FFECB3",  # Light yellow
+        2: "#FFD54F",  # Medium yellow
+        3: "#FFA726",  # Orange
+    },
+    "Hot": {
+        1: "#FFCDD2",  # Light red
+        2: "#EF5350",  # Medium red
+        3: "#D32F2F",  # Dark red
+    },
+    "Sunny Day": {
+        1: "#FFF9C4",  # Very light yellow
+        2: "#FFF176",  # Medium yellow
+        3: "#FF9800",  # Orange
+    }
+}
+
+
 def initialize_game() -> None:
     """Initialize a new game."""
     if "game" not in st.session_state:
         st.session_state.game = FiveDiceGame()
         st.session_state.game.players = [Player("Player 1"), Player("Player 2")]
+    
+    # Initialize color palette if not set
+    if "color_palette" not in st.session_state:
+        st.session_state.color_palette = "Cool"
+
+
+def get_roll_color() -> str:
+    """Get the current color based on rolls left."""
+    game = st.session_state.game
+    palette = COLOR_PALETTES[st.session_state.color_palette]
+    
+    # Map rolls_left to roll number (3 rolls_left = 1st roll, 2 = 2nd, 1 = 3rd, 0 = finished)
+    if game.rolls_left == 3:
+        return "#FFFFFF"  # White for initial state
+    elif game.rolls_left == 2:
+        return palette[1]  # First roll
+    elif game.rolls_left == 1:
+        return palette[2]  # Second roll
+    else:
+        return palette[3]  # Third roll
+
+
+def render_color_palette_selector() -> None:
+    """Render color palette selection in sidebar."""
+    with st.sidebar:
+        st.subheader("🎨 Dice Colors")
+        
+        selected_palette = st.selectbox(
+            "Choose color theme:",
+            options=list(COLOR_PALETTES.keys()),
+            index=list(COLOR_PALETTES.keys()).index(st.session_state.color_palette),
+            key="palette_selector"
+        )
+        
+        if selected_palette != st.session_state.color_palette:
+            st.session_state.color_palette = selected_palette
+            st.rerun()
+        
+        # Show color preview
+        st.write("**Roll Colors:**")
+        palette = COLOR_PALETTES[selected_palette]
+        for roll_num, color in palette.items():
+            st.markdown(
+                f'<div style="background-color: {color}; padding: 8px; margin: 2px 0; border-radius: 4px; text-align: center; border: 1px solid #ccc;">Roll {roll_num}</div>',
+                unsafe_allow_html=True
+            )
 
 
 def render_dice() -> None:
-    """Render the dice with hold/unhold functionality and visual effects."""
-    st.subheader("🎲 Dice")
-    game = st.session_state.game
-
-    dice_emoji = {1: "⚀", 2: "⚁", 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅"}
-
-    # Top row: 3 dice in columns that won't stack on mobile
-    col1, col2, col3 = st.columns(3)
-    for i, col in enumerate([col1, col2, col3]):
-        with col:
-            die_value = game.dice[i]
-            is_held = game.dice_held[i]
-            just_changed = game.just_rolled and game.previous_dice[i] != die_value and not is_held
-
-            # Display dice with status
-            if just_changed:
-                st.markdown(f"## ✨{dice_emoji[die_value]}✨")
-                st.caption("🆕 NEW!")
-            elif is_held:
-                st.markdown(f"## 🔒{dice_emoji[die_value]}")
-                st.caption("🔴 HELD")
-            else:
-                st.markdown(f"## {dice_emoji[die_value]}")
-                st.caption("Available")
-
-    # Bottom row: 2 dice centered
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
-    for i, col in enumerate([col2, col4], start=3):  # Use columns 2 and 4 to center
-        with col:
-            die_value = game.dice[i]
-            is_held = game.dice_held[i]
-            just_changed = game.just_rolled and game.previous_dice[i] != die_value and not is_held
-
-            # Display dice with status
-            if just_changed:
-                st.markdown(f"## ✨{dice_emoji[die_value]}✨")
-                st.caption("🆕 NEW!")
-            elif is_held:
-                st.markdown(f"## 🔒{dice_emoji[die_value]}")
-                st.caption("🔴 HELD")
-            else:
-                st.markdown(f"## {dice_emoji[die_value]}")
-                st.caption("Available")
-
-    st.markdown("---")
-    st.markdown("**Tap to Hold/Unhold:**")
-
-    # Compact buttons in a single row
-    btn_col1, btn_col2, btn_col3, btn_col4, btn_col5 = st.columns(5)
-    button_cols = [btn_col1, btn_col2, btn_col3, btn_col4, btn_col5]
-
-    for i, col in enumerate(button_cols):
-        with col:
-            is_held = game.dice_held[i]
-            # Simple emoji buttons
-            button_emoji = "🔓" if is_held else "🔒"
-            button_type = "secondary" if is_held else "primary"
-
-            if st.button(
-                button_emoji,
-                key=f"hold_die_{i}",
-                disabled=game.rolls_left == 3,
-                type=button_type,
-                use_container_width=True,
-            ):
-                game.toggle_die_hold(i)
-                st.rerun()
-
-    # Add labels under buttons
-    label_col1, label_col2, label_col3, label_col4, label_col5 = st.columns(5)
-    label_cols = [label_col1, label_col2, label_col3, label_col4, label_col5]
-
-    for i, col in enumerate(label_cols):
-        with col:
-            st.caption(f"Die {i + 1}")
-def render_dice() -> None:
-    """Render the dice with hold/unhold functionality and visual effects."""
+    """Render the dice with hold/unhold functionality and color-coded rolls."""
     st.subheader("🎲 Dice")
     game = st.session_state.game
     
+    # Show instruction only when rolls have started
+    if game.rolls_left < 3:
+        st.caption("💡 Tap dice to hold/unhold them")
+    
     dice_emoji = {1: "⚀", 2: "⚁", 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅"}
     
-    # All 5 dice in one row - they'll be small but functional on mobile
+    # Get current roll color
+    roll_color = get_roll_color()
+    
+    # All 5 dice in one row with larger size
     col1, col2, col3, col4, col5 = st.columns(5)
     dice_cols = [col1, col2, col3, col4, col5]
     
@@ -224,22 +231,52 @@ def render_dice() -> None:
         with col:
             die_value = game.dice[i]
             is_held = game.dice_held[i]
-            just_changed = (game.just_rolled and 
-                           game.previous_dice[i] != die_value and 
-                           not is_held)
             
-            # Create button text based on state
+            # Determine button style
             if is_held:
-                button_text = f"🔒\n{dice_emoji[die_value]}\nHELD"
+                # Use a darker shade when held
+                button_style = """
+                <style>
+                .held-dice button {
+                    background-color: #666666 !important;
+                    color: white !important;
+                    border: 3px solid #333333 !important;
+                    font-size: 2.5rem !important;
+                    height: 80px !important;
+                    border-radius: 12px !important;
+                }
+                </style>
+                """
+                st.markdown(button_style, unsafe_allow_html=True)
+                button_text = f"🔒\n{dice_emoji[die_value]}"
                 button_type = "secondary"
-            elif just_changed:
-                button_text = f"✨\n{dice_emoji[die_value]}\nNEW"
-                button_type = "primary"
+                container_class = "held-dice"
             else:
-                button_text = f"{dice_emoji[die_value]}\nTap to\nHold"
+                # Use roll color for unheld dice
+                button_style = f"""
+                <style>
+                .roll-dice-{i} button {{
+                    background-color: {roll_color} !important;
+                    color: #333333 !important;
+                    border: 2px solid #cccccc !important;
+                    font-size: 2.5rem !important;
+                    height: 80px !important;
+                    border-radius: 12px !important;
+                }}
+                .roll-dice-{i} button:hover {{
+                    border: 3px solid #999999 !important;
+                    transform: translateY(-2px) !important;
+                }}
+                </style>
+                """
+                st.markdown(button_style, unsafe_allow_html=True)
+                button_text = dice_emoji[die_value]
                 button_type = "primary"
+                container_class = f"roll-dice-{i}"
             
-            # Single button that acts as both display and control
+            # Create a container with the appropriate class
+            st.markdown(f'<div class="{container_class}">', unsafe_allow_html=True)
+            
             if st.button(
                 button_text,
                 key=f"dice_button_{i}",
@@ -248,14 +285,10 @@ def render_dice() -> None:
                 use_container_width=True
             ):
                 game.toggle_die_hold(i)
-                # Clear the "NEW" state when interacted with
-                if just_changed:
-                    game.just_rolled = False
                 st.rerun()
-    
-    # Add a small instruction
-    if game.rolls_left < 3:
-        st.caption("💡 Tap dice to hold/unhold them")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
+
 
 def render_roll_section() -> None:
     """Render the roll dice section with enhanced visuals."""
@@ -414,7 +447,10 @@ def render_new_game_button() -> None:
 def main():
     """Main function to run the Dice Game page."""
     st.set_page_config(
-        page_title="Dice Game - Five Dice", page_icon="🎲", layout="wide", initial_sidebar_state="collapsed"
+        page_title="Dice Game - Five Dice", 
+        page_icon="🎲", 
+        layout="wide", 
+        initial_sidebar_state="expanded"
     )
 
     # Enhanced CSS for mobile optimization and visual effects
@@ -432,25 +468,26 @@ def main():
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .stColumns > div {
-        padding: 0 8px;
+        padding: 0 4px;
     }
     
     /* Mobile responsiveness */
     @media (max-width: 768px) {
         .stButton > button {
-            font-size: 14px;
-            padding: 8px 12px;
+            font-size: 16px;
+            padding: 12px 16px;
+            min-height: 60px;
+        }
+        .stColumns > div {
+            padding: 0 2px;
         }
     }
     
-    /* Enhanced animations */
-    @keyframes glow {
-        from { box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); }
-        to { box-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
-    }
-    
-    .dice-glow {
-        animation: glow 0.5s ease-in-out alternate infinite;
+    /* Dice button styling */
+    .stButton button {
+        font-weight: bold;
+        text-align: center;
+        line-height: 1.2;
     }
     </style>
     """,
@@ -462,6 +499,9 @@ def main():
 
     # Initialize game
     initialize_game()
+    
+    # Render color palette selector in sidebar
+    render_color_palette_selector()
 
     # Game rules expander
     with st.expander("📋 How to Play", expanded=False):
@@ -476,6 +516,11 @@ def main():
         4. Each category can only be used once per player
         5. If you can't make a valid combination, you must take a zero in any category
         
+        **Dice Colors:**
+        - Dice change color with each roll to show your progress
+        - Held dice appear darker with a lock icon
+        - Customize colors using the sidebar selector
+        
         **Scoring Categories:**
         - **Upper Section:** Count and add only dice of the specified number
         - **3/4 of a Kind:** Sum of all dice if you have 3/4 of the same number
@@ -486,11 +531,6 @@ def main():
         - **Chance:** Sum of all dice
         
         **Bonus:** Get 35 extra points if your upper section totals 63 or more!
-        
-        **Visual Cues:**
-        - 🔒 Red highlight = Held dice
-        - ✨ Green highlight = Dice that just changed
-        - Click dice buttons to hold/unhold them
         """
         )
 
