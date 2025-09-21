@@ -317,6 +317,43 @@ def render_dice() -> None:
             ):
                 game.toggle_die_hold(i)
                 st.rerun()
+    
+    # Add dice held display under the dice
+    if game.rolls_left < 3:
+        st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
+        
+        # Get held dice emoji
+        held_dice = [game.dice[i] for i in range(5) if game.dice_held[i]]
+        
+        if held_dice:
+            held_dice_display = "".join([dice_emoji[die] for die in held_dice])
+            st.markdown(
+                f"""
+                <div style='text-align: center; margin: 10px 0;'>
+                    <div style='font-weight: bold; font-size: 1.1rem; color: #555; margin-bottom: 5px;'>
+                        Dice Held ({len(held_dice)})
+                    </div>
+                    <div style='font-size: 2rem; letter-spacing: 4px;'>
+                        {held_dice_display}
+                    </div>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                """
+                <div style='text-align: center; margin: 10px 0;'>
+                    <div style='font-weight: bold; font-size: 1.1rem; color: #555; margin-bottom: 5px;'>
+                        Dice Held (0)
+                    </div>
+                    <div style='font-size: 1.2rem; color: #888; font-style: italic;'>
+                        None
+                    </div>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
 
 
 def render_roll_section() -> None:
@@ -326,7 +363,7 @@ def render_roll_section() -> None:
 
     st.subheader(f"🎯 {current_player.name}'s Turn")
 
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2 = st.columns([1, 2])  # Removed the third column since dice held moved
 
     with col1:
         st.metric("Rolls Left", game.rolls_left)
@@ -343,24 +380,6 @@ def render_roll_section() -> None:
             with st.spinner("🎲 Rolling dice..."):
                 time.sleep(0.8)  # Visual delay for effect
             st.rerun()
-
-    with col3:
-        if game.rolls_left < 3:
-            # Get held dice emoji instead of just count
-            dice_emoji = {1: "⚀", 2: "⚁", 3: "⚂", 4: "⚃", 5: "⚄", 6: "⚅"}
-            held_dice = [game.dice[i] for i in range(5) if game.dice_held[i]]
-            
-            if held_dice:
-                # Create a string of held dice emoji
-                held_dice_display = "".join([dice_emoji[die] for die in held_dice])
-                st.metric("Dice Held", f"{len(held_dice)}")
-                # Display the actual dice below the count
-                st.markdown(f"<div style='text-align: center; font-size: 1.5rem; margin-top: -10px;'>{held_dice_display}</div>", 
-                           unsafe_allow_html=True)
-            else:
-                st.metric("Dice Held", "0")
-                st.markdown("<div style='text-align: center; font-size: 1.2rem; margin-top: -10px; color: #666;'>None</div>", 
-                           unsafe_allow_html=True)
 
 
 def render_scoring_section() -> None:
