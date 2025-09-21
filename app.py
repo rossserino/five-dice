@@ -277,7 +277,6 @@ def render_dice() -> None:
         background-color: {roll_color} !important;
         color: #222222 !important;
         font-size: 4rem !important;
-        height: 120px !important;
         border: 4px solid #aaaaaa !important;
         border-radius: 20px !important;
         font-family: 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif !important;
